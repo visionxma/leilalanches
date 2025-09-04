@@ -7,9 +7,14 @@ export interface CartItem {
   id: string
   name: string
   price: number
+  promotionalPrice?: {
+    quantity: number
+    totalPrice: number
+  }
   image: string
   quantity: number
   category: string
+  subcategory?: string
   size?: string
   brand?: string
 }
@@ -68,9 +73,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           id: product.id,
           name: product.name,
           price: product.price,
+          promotionalPrice: product.promotionalPrice,
           image: product.images?.[0] || "/placeholder.svg",
           quantity: 1,
           category: product.category,
+          subcategory: product.subcategory,
           size: product.size,
           brand: product.brand,
         }
@@ -124,7 +131,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   const getTotalPrice = () => {
-    return items.reduce((total, item) => total + (item.price * item.quantity), 0)
+    return items.reduce((total, item) => {
+      if (item.promotionalPrice && item.quantity >= item.promotionalPrice.quantity) {
+        const promoSets = Math.floor(item.quantity / item.promotionalPrice.quantity)
+        const remainingItems = item.quantity % item.promotionalPrice.quantity
+        const promoTotal = promoSets * item.promotionalPrice.totalPrice
+        const regularTotal = remainingItems * item.price
+        return total + promoTotal + regularTotal
+      }
+      return total + (item.price * item.quantity)
+    }, 0)
   }
 
   return (

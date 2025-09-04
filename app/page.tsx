@@ -15,8 +15,13 @@ export interface Product {
   name: string
   description: string
   price: number
+  promotionalPrice?: {
+    quantity: number
+    totalPrice: number
+  }
   images: string[]
   category: string
+  subcategory?: string
   size?: string
   brand?: string
   stock?: number
@@ -56,6 +61,7 @@ export default function HomePage() {
     window.addEventListener("openProductModal", handleOpenProductModal as EventListener)
 
     return () => {
+      unsubscribe()
       window.removeEventListener("openProductModal", handleOpenProductModal as EventListener)
     }
   }, [])
@@ -138,7 +144,7 @@ export default function HomePage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                      d="M6 18L18 6M6 6l12 12"
                     />
                   </svg>
                 </button>

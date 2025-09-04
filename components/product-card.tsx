@@ -45,10 +45,19 @@ export function ProductCard({ product, isSelected, onSelect, compact = false }: 
         <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         
         {/* Badge de preço */}
-        <div className="absolute top-2 left-2 backdrop-blur-md bg-white/90 rounded-full px-2 py-1 shadow-sm border border-white/50">
-          <span className="text-xs font-bold text-blue-600">
-            R$ {product.price.toFixed(2)}
-          </span>
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
+          {product.promotionalPrice && (
+            <div className="backdrop-blur-md bg-red-500/90 rounded-full px-2 py-1 shadow-sm border border-red-400/50">
+              <span className="text-xs font-bold text-white">
+                {product.promotionalPrice.quantity}x R$ {product.promotionalPrice.totalPrice.toFixed(2)}
+              </span>
+            </div>
+          )}
+          <div className="backdrop-blur-md bg-white/90 rounded-full px-2 py-1 shadow-sm border border-white/50">
+            <span className="text-xs font-bold text-blue-600">
+              R$ {product.price.toFixed(2)}
+            </span>
+          </div>
         </div>
 
         {/* Badges informativos (tamanho e marca) */}
@@ -115,13 +124,18 @@ export function ProductCard({ product, isSelected, onSelect, compact = false }: 
         </div>
 
         {/* Categoria */}
-        {product.category && (
-          <div className="flex items-center">
+        <div className="flex items-center gap-1 flex-wrap">
+          {product.category && (
             <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
               {product.category}
             </span>
-          </div>
-        )}
+          )}
+          {product.subcategory && (
+            <span className="text-[10px] text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded-full">
+              {product.subcategory}
+            </span>
+          )}
+        </div>
 
         {/* Footer do card */}
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">

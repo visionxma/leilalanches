@@ -57,12 +57,17 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
   }
 
   const handleBuyNow = () => {
+    let priceInfo = `*Preço:* R$ ${product.price.toFixed(2)}`
+    if (product.promotionalPrice) {
+      priceInfo += `\n*Promoção:* ${product.promotionalPrice.quantity}x por R$ ${product.promotionalPrice.totalPrice.toFixed(2)}`
+    }
+    
     const message = `🛒 *INTERESSE EM PRODUTO*
 
 *Produto:* ${product.name}
-*Preço:* R$ ${product.price.toFixed(2)}
+${priceInfo}
 *Categoria:* ${product.category}
-${product.size ? `*Tamanho:* ${product.size}\n` : ""}${product.brand ? `*Marca:* ${product.brand}\n` : ""}
+${product.subcategory ? `*Subcategoria:* ${product.subcategory}\n` : ""}${product.size ? `*Tamanho:* ${product.size}\n` : ""}${product.brand ? `*Marca:* ${product.brand}\n` : ""}
 *Descrição:* ${product.description}
 
 📱 *Interesse demonstrado pelo site*
@@ -167,6 +172,22 @@ Gostaria de mais informações sobre este produto! 🙏`
 
               {/* Product info */}
               <div className="grid grid-cols-1 gap-4">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <Package className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm text-gray-600">Categoria</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-gray-900">{product.category}</p>
+                      {product.subcategory && (
+                        <>
+                          <span className="text-gray-400">•</span>
+                          <p className="font-medium text-blue-600">{product.subcategory}</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 {product.brand && (
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                     <Package className="h-5 w-5 text-blue-600" />

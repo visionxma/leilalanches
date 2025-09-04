@@ -272,6 +272,7 @@ export function OrderStatus() {
                               <h5 className="font-medium text-sm">{item.productName}</h5>
                               <div className="flex items-center gap-2 text-xs text-gray-600">
                                 <Badge variant="outline">{item.category}</Badge>
+                                {item.subcategory && <Badge variant="secondary">{item.subcategory}</Badge>}
                                 {item.size && <Badge variant="secondary">{item.size}</Badge>}
                                 {item.brand && <Badge variant="outline">{item.brand}</Badge>}
                               </div>

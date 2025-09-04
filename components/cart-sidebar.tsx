@@ -125,9 +125,28 @@ export function CartSidebar() {
 
                         {/* Subtotal e remover */}
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-bold text-right min-w-[70px]">
-                            R$ {(item.price * item.quantity).toFixed(2)}
-                          </p>
+                          <div className="text-right min-w-[70px]">
+                            {item.promotionalPrice && item.quantity >= item.promotionalPrice.quantity ? (
+                              <div>
+                                <p className="text-sm font-bold text-green-600">
+                                  R$ {(() => {
+                                    const promoSets = Math.floor(item.quantity / item.promotionalPrice.quantity)
+                                    const remainingItems = item.quantity % item.promotionalPrice.quantity
+                                    const promoTotal = promoSets * item.promotionalPrice.totalPrice
+                                    const regularTotal = remainingItems * item.price
+                                    return (promoTotal + regularTotal).toFixed(2)
+                                  })()}
+                                </p>
+                                <p className="text-xs text-gray-500 line-through">
+                                  R$ {(item.price * item.quantity).toFixed(2)}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="text-sm font-bold">
+                                R$ {(item.price * item.quantity).toFixed(2)}
+                              </p>
+                            )}
+                          </div>
                           <Button
                             size="icon"
                             variant="ghost"

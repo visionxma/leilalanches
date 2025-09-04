@@ -205,7 +205,17 @@ export function CheckoutModal({ isOpen, onClose, directProduct }: CheckoutModalP
     const itemsList = checkoutItems
       .map(
         (item) =>
-          `• ${item.name} ${item.size ? `(${item.size})` : ""} - Qtd: ${item.quantity} - R$ ${(item.price * item.quantity).toFixed(2)}`,
+          `• ${item.name} ${item.subcategory ? `[${item.subcategory}]` : ""} ${item.size ? `(${item.size})` : ""} - Qtd: ${item.quantity} - ${
+            item.promotionalPrice && item.quantity >= item.promotionalPrice.quantity
+              ? (() => {
+                  const promoSets = Math.floor(item.quantity / item.promotionalPrice.quantity)
+                  const remainingItems = item.quantity % item.promotionalPrice.quantity
+                  const promoTotal = promoSets * item.promotionalPrice.totalPrice
+                  const regularTotal = remainingItems * item.price
+                  return `R$ ${(promoTotal + regularTotal).toFixed(2)} (Promoção aplicada!)`
+                })()
+              : `R$ ${(item.price * item.quantity).toFixed(2)}`
+          }`,
       )
       .join("\n")
 
@@ -332,12 +342,32 @@ Gostaria de confirmar este pedido! 🙏`
                     <h4 className="font-medium text-sm">{item.name}</h4>
                     <div className="flex items-center gap-2 text-xs text-gray-600">
                       <Badge variant="outline">{item.category}</Badge>
+                      {item.subcategory && <Badge variant="secondary">{item.subcategory}</Badge>}
                       {item.size && <Badge variant="secondary">{item.size}</Badge>}
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium">Qtd: {item.quantity}</p>
-                    <p className="text-sm font-bold text-primary">R$ {(item.price * item.quantity).toFixed(2)}</p>
+                    <div className="text-sm">
+                      {item.promotionalPrice && item.quantity >= item.promotionalPrice.quantity ? (
+                        <div>
+                          <p className="font-bold text-green-600">
+                            R$ {(() => {
+                              const promoSets = Math.floor(item.quantity / item.promotionalPrice.quantity)
+                              const remainingItems = item.quantity % item.promotionalPrice.quantity
+                              const promoTotal = promoSets * item.promotionalPrice.totalPrice
+                              const regularTotal = remainingItems * item.price
+                              return (promoTotal + regularTotal).toFixed(2)
+                            })()}
+                          </p>
+                          <p className="text-xs text-gray-500 line-through">
+                            R$ {(item.price * item.quantity).toFixed(2)}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="font-bold text-primary">R$ {(item.price * item.quantity).toFixed(2)}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

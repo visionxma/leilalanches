@@ -209,41 +209,17 @@ export default function HomePage() {
             {/* Mostrar produtos agrupados por categoria ou lista simples */}
             {searchTerm ? (
               // Se há pesquisa, mostrar lista simples com 5 produtos por linha
-              
-              {/* Agrupar por subcategoria dentro da categoria */}
-              {(() => {
-                const subcategoryGroups = groupedProducts[category].reduce((acc, product) => {
-                  const subcategory = product.subcategory || 'Outros'
-                  if (!acc[subcategory]) {
-                    acc[subcategory] = []
-                  }
-                  acc[subcategory].push(product)
-                  return acc
-                }, {} as Record<string, Product[]>)
-                
-                const subcategories = Object.keys(subcategoryGroups).sort()
-                
-                return subcategories.map((subcategory) => (
-                  <div key={`${category}-${subcategory}`} className="space-y-2">
-                    {subcategories.length > 1 && subcategory !== 'Outros' && (
-                      <h3 className="text-sm font-medium text-muted-foreground ml-2">
-                        {subcategory}
-                      </h3>
-                    )}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-                      {subcategoryGroups[subcategory].map((product) => (
-                        <ProductCard
-                          key={product.id}
-                          product={product}
-                          isSelected={false}
-                          onSelect={() => handleProductSelect(product)}
-                          compact={true}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))
-              })()}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    isSelected={false}
+                    onSelect={() => handleProductSelect(product)}
+                    compact={true}
+                  />
+                ))}
+              </div>
             ) : (
               // Se não há pesquisa, mostrar agrupado por categoria
               categories.map((category) => (
@@ -262,7 +238,7 @@ export default function HomePage() {
                         isSelected={false}
                         onSelect={() => handleProductSelect(product)}
                         compact={true}
-                      />
+                      ))}
                     ))}
                   </div>
                 </div>

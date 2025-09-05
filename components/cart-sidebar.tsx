@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { useCart } from "./cart-provider"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -22,20 +23,36 @@ export function CartSidebar() {
     }
   }
 
-  const calculateItemSubtotal = (item: any) => {
-    if (!item.promotionalPrice || !item.promotionalPrice.quantity || !item.promotionalPrice.totalPrice) {
-      return ((item.price || 0) * (item.quantity || 0)).toFixed(2)
-    }
+  const calculateItemSubtotal = (item: any): string => {
+    const price = item.price || 0
+    const quantity = item.quantity || 0
     
-    if (item.quantity >= item.promotionalPrice.quantity) {
-      const promoSets = Math.floor(item.quantity / item.promotionalPrice.quantity)
-      const remainingItems = item.quantity % item.promotionalPrice.quantity
-      const promoTotal = promoSets * item.promotionalPrice.totalPrice
-      const regularTotal = remainingItems * (item.price || 0)
+    if (item.promotionalPrice && 
+        item.promotionalPrice.quantity && 
+        item.promotionalPrice.totalPrice && 
+        quantity >= item.promotionalPrice.quantity) {
+      
+      const promoSets = Math.floor(quantity / item.promotionalPrice.quantity)
+      const remainingItems = quantity % item.promotionalPrice.quantity
+      const promoTotal = promoSets * (item.promotionalPrice.totalPrice || 0)
+      const regularTotal = remainingItems * price
       return (promoTotal + regularTotal).toFixed(2)
     }
     
-    return ((item.price || 0) * (item.quantity || 0)).toFixed(2)
+    return (price * quantity).toFixed(2)
+  }
+
+  const hasPromotionalDiscount = (item: any): boolean => {
+    return item.promotionalPrice && 
+           item.promotionalPrice.quantity && 
+           item.promotionalPrice.totalPrice && 
+           item.quantity >= item.promotionalPrice.quantity
+  }
+
+  const getRegularPrice = (item: any): string => {
+    const price = item.price || 0
+    const quantity = item.quantity || 0
+    return (price * quantity).toFixed(2)
   }
 
   return (
@@ -85,7 +102,6 @@ export function CartSidebar() {
               </div>
             ) : (
               <>
-                {/* Lista de itens com scroll */}
                 <div className="flex-1 overflow-y-auto py-4 px-4 space-y-3">
                   {items.map((item) => (
                     <div
@@ -94,18 +110,21 @@ export function CartSidebar() {
                     >
                       <img
                         src={item.image || "/placeholder.svg"}
-                        alt={item.name}
+                        alt={item.name || "Produto"}
                         className="w-16 h-16 object-cover rounded-md flex-shrink-0"
                         onError={(e) => {
-                          e.currentTarget.src = "/api/placeholder/64/64"
+                          const target = e.target as HTMLImageElement
+                          target.src = "/api/placeholder/64/64"
                         }}
                       />
 
                       <div className="flex-1 min-w-0 space-y-1">
-                        <h4 className="font-medium text-sm line-clamp-2 leading-tight">{item.name}</h4>
+                        <h4 className="font-medium text-sm line-clamp-2 leading-tight">
+                          {item.name || "Produto sem nome"}
+                        </h4>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="text-xs">
-                            {item.category}
+                            {item.category || "Categoria"}
                           </Badge>
                           {item.size && (
                             <Badge variant="secondary" className="text-xs">
@@ -113,42 +132,44 @@ export function CartSidebar() {
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm font-bold text-primary">R$ {(item.price || 0).toFixed(2)}</p>
+                        <p className="text-sm font-bold text-primary">
+                          R$ {(item.price || 0).toFixed(2)}
+                        </p>
                       </div>
 
                       <div className="flex flex-col items-end gap-3">
-                        {/* Controles de quantidade */}
                         <div className="flex items-center gap-1.5">
                           <Button
                             size="icon"
                             variant="outline"
                             className="h-7 w-7 bg-transparent"
-                            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                            disabled={item.quantity <= 1}
+                            onClick={() => handleQuantityChange(item.id, (item.quantity || 1) - 1)}
+                            disabled={(item.quantity || 1) <= 1}
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
-                          <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                          <span className="w-8 text-center text-sm font-medium">
+                            {item.quantity || 1}
+                          </span>
                           <Button
                             size="icon"
                             variant="outline"
                             className="h-7 w-7 bg-transparent"
-                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                            onClick={() => handleQuantityChange(item.id, (item.quantity || 1) + 1)}
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
                         </div>
 
-                        {/* Subtotal e remover */}
                         <div className="flex items-center gap-2">
                           <div className="text-right min-w-[70px]">
-                            {item.promotionalPrice && item.quantity >= item.promotionalPrice.quantity ? (
+                            {hasPromotionalDiscount(item) ? (
                               <div>
                                 <p className="text-sm font-bold text-green-600">
                                   R$ {calculateItemSubtotal(item)}
                                 </p>
                                 <p className="text-xs text-gray-500 line-through">
-                                  R$ {((item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                                  R$ {getRegularPrice(item)}
                                 </p>
                               </div>
                             ) : (
@@ -173,12 +194,13 @@ export function CartSidebar() {
 
                 <Separator />
 
-                {/* Resumo e checkout */}
                 <div className="p-4 space-y-4 bg-muted/30">
                   <div className="space-y-2">
                     <div className="flex justify-between items-center text-lg">
                       <span className="font-semibold">Total:</span>
-                      <span className="font-bold text-primary">R$ {(getTotalPrice() || 0).toFixed(2)}</span>
+                      <span className="font-bold text-primary">
+                        R$ {(getTotalPrice() || 0).toFixed(2)}
+                      </span>
                     </div>
                   </div>
 
@@ -223,7 +245,6 @@ export function CartSidebar() {
         </SheetContent>
       </Sheet>
 
-      {/* Modal de checkout */}
       <CheckoutModal isOpen={showCheckoutModal} onClose={() => setShowCheckoutModal(false)} />
     </>
   )

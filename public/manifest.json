@@ -1,0 +1,27 @@
+{
+  "name": "Delivery Express",
+  "short_name": "Delivery Express",
+  "description": "Sua loja online com entrega rápida e segura",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0000FF",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["shopping", "food"],
+  "lang": "pt-BR",
+  "dir": "ltr"
+}

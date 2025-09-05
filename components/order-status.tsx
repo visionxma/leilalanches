@@ -280,7 +280,7 @@ export function OrderStatus() {
                             <div className="text-right">
                               <p className="text-sm">Qtd: {item.quantity}</p>
                               <p className="text-sm font-bold text-primary">
-                                R$ {(item.price * item.quantity).toFixed(2)}
+                                R$ {((item.price || 0) * (item.quantity || 0)).toFixed(2)}
                               </p>
                             </div>
                           </div>
@@ -299,7 +299,7 @@ export function OrderStatus() {
                         )}
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-primary">Total: R$ {order.total.toFixed(2)}</p>
+                        <p className="text-lg font-bold text-primary">Total: R$ {(order.total || 0).toFixed(2)}</p>
                       </div>
                     </div>
                   </CardContent>

@@ -47,7 +47,7 @@ export function CheckoutModal({ isOpen, onClose, directProduct }: CheckoutModalP
         {
           id: directProduct.id,
           name: directProduct.name,
-          price: directProduct.price,
+          price: directProduct.price || 0,
           quantity: 1,
           image: directProduct.images?.[0] || "/placeholder.svg",
           category: directProduct.category,
@@ -57,7 +57,7 @@ export function CheckoutModal({ isOpen, onClose, directProduct }: CheckoutModalP
       ]
     : items
 
-  const checkoutTotal = directProduct ? directProduct.price : getTotalPrice()
+  const checkoutTotal = directProduct ? (directProduct.price || 0) : getTotalPrice()
 
   useEffect(() => {
     if (isOpen) {
@@ -111,7 +111,7 @@ export function CheckoutModal({ isOpen, onClose, directProduct }: CheckoutModalP
         items: checkoutItems.map((item) => ({
           productId: item.id,
           productName: item.name,
-          price: item.price,
+          price: item.price || 0,
           quantity: item.quantity,
           imageUrl: item.image,
           category: item.category,
@@ -208,13 +208,16 @@ export function CheckoutModal({ isOpen, onClose, directProduct }: CheckoutModalP
           `• ${item.name} ${item.subcategory ? `[${item.subcategory}]` : ""} ${item.size ? `(${item.size})` : ""} - Qtd: ${item.quantity} - ${
             item.promotionalPrice && item.quantity >= item.promotionalPrice.quantity
               ? (() => {
+                  if (!item.promotionalPrice.quantity || !item.promotionalPrice.totalPrice) {
+                    return `R$ ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}`
+                  }
                   const promoSets = Math.floor(item.quantity / item.promotionalPrice.quantity)
                   const remainingItems = item.quantity % item.promotionalPrice.quantity
                   const promoTotal = promoSets * item.promotionalPrice.totalPrice
-                  const regularTotal = remainingItems * item.price
+                  const regularTotal = remainingItems * (item.price || 0)
                   return `R$ ${(promoTotal + regularTotal).toFixed(2)} (Promoção aplicada!)`
                 })()
-              : `R$ ${(item.price * item.quantity).toFixed(2)}`
+              : `R$ ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}`
           }`,
       )
       .join("\n")
@@ -229,7 +232,7 @@ ${customerData.email ? `*Email:* ${customerData.email}\n` : ""}
 *Itens do Pedido:*
 ${itemsList}
 
-*Total: R$ ${checkoutTotal.toFixed(2)}*
+*Total: R$ ${(checkoutTotal || 0).toFixed(2)}*
 
 *Endereço de entrega:* ${customerData.address}
 ${customerData.notes ? `\n*Observações:* ${customerData.notes}` : ""}
@@ -353,19 +356,22 @@ Gostaria de confirmar este pedido! 🙏`
                         <div>
                           <p className="font-bold text-green-600">
                             R$ {(() => {
+                              if (!item.promotionalPrice || !item.promotionalPrice.quantity || !item.promotionalPrice.totalPrice) {
+                                return ((item.price || 0) * (item.quantity || 0)).toFixed(2)
+                              }
                               const promoSets = Math.floor(item.quantity / item.promotionalPrice.quantity)
                               const remainingItems = item.quantity % item.promotionalPrice.quantity
                               const promoTotal = promoSets * item.promotionalPrice.totalPrice
-                              const regularTotal = remainingItems * item.price
+                              const regularTotal = remainingItems * (item.price || 0)
                               return (promoTotal + regularTotal).toFixed(2)
                             })()}
                           </p>
                           <p className="text-xs text-gray-500 line-through">
-                            R$ {(item.price * item.quantity).toFixed(2)}
+                            R$ {((item.price || 0) * (item.quantity || 0)).toFixed(2)}
                           </p>
                         </div>
                       ) : (
-                        <p className="font-bold text-primary">R$ {(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="font-bold text-primary">R$ {((item.price || 0) * (item.quantity || 0)).toFixed(2)}</p>
                       )}
                     </div>
                   </div>
@@ -376,7 +382,7 @@ Gostaria de confirmar este pedido! 🙏`
 
               <div className="flex justify-between items-center text-lg font-bold">
                 <span>Total:</span>
-                <span className="text-primary">R$ {checkoutTotal.toFixed(2)}</span>
+                <span className="text-primary">R$ {(checkoutTotal || 0).toFixed(2)}</span>
               </div>
             </CardContent>
           </Card>

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect } from "react"
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react"
 import { toast } from "@/hooks/use-toast"
 
 export interface CartItem {
@@ -39,73 +39,98 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Carregar carrinho do localStorage
   useEffect(() => {
-    const savedCart = localStorage.getItem("cart")
-    if (savedCart) {
-      try {
-        setItems(JSON.parse(savedCart))
-      } catch (error) {
-        console.error("Erro ao carregar carrinho:", error)
+    try {
+      const savedCart = localStorage.getItem("cart")
+      if (savedCart) {
+        const parsedCart = JSON.parse(savedCart)
+        if (Array.isArray(parsedCart)) {
+          setItems(parsedCart)
+        }
       }
+    } catch (error) {
+      console.error("Erro ao carregar carrinho:", error)
     }
   }, [])
 
   // Salvar carrinho no localStorage
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(items))
+    try {
+      localStorage.setItem("cart", JSON.stringify(items))
+    } catch (error) {
+      console.error("Erro ao salvar carrinho:", error)
+    }
   }, [items])
 
-  const addItem = (product: any) => {
+  const addItem = useCallback((product: any) => {
     setItems(currentItems => {
       const existingItem = currentItems.find(item => item.id === product.id)
       
+      let newItems
       if (existingItem) {
-        toast({
-          title: "Quantidade atualizada",
-          description: `${product.name} - quantidade aumentada para ${existingItem.quantity + 1}`,
-        })
-        return currentItems.map(item =>
+        newItems = currentItems.map(item =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         )
+        
+        // Defer toast to avoid setState during render
+        setTimeout(() => {
+          toast({
+            title: "Quantidade atualizada",
+            description: `${product.name} - quantidade aumentada para ${existingItem.quantity + 1}`,
+          })
+        }, 0)
+        
+        return newItems
       } else {
         const newItem: CartItem = {
           id: product.id,
           name: product.name,
-          price: product.price,
+          price: product.price || 0,
           promotionalPrice: product.promotionalPrice,
           image: product.images?.[0] || "/placeholder.svg",
           quantity: 1,
-          category: product.category,
+          category: product.category || "Sem categoria",
           subcategory: product.subcategory,
           size: product.size,
           brand: product.brand,
         }
         
-        toast({
-          title: "Produto adicionado",
-          description: `${product.name} foi adicionado ao carrinho`,
-        })
+        newItems = [...currentItems, newItem]
         
-        return [...currentItems, newItem]
+        // Defer toast to avoid setState during render
+        setTimeout(() => {
+          toast({
+            title: "Produto adicionado",
+            description: `${product.name} foi adicionado ao carrinho`,
+          })
+        }, 0)
+        
+        return newItems
       }
     })
-  }
+  }, [])
 
-  const removeItem = (productId: string) => {
+  const removeItem = useCallback((productId: string) => {
     setItems(currentItems => {
       const item = currentItems.find(item => item.id === productId)
+      const newItems = currentItems.filter(item => item.id !== productId)
+      
+      // Defer toast to avoid setState during render
       if (item) {
-        toast({
-          title: "Produto removido",
-          description: `${item.name} foi removido do carrinho`,
-        })
+        setTimeout(() => {
+          toast({
+            title: "Produto removido",
+            description: `${item.name} foi removido do carrinho`,
+          })
+        }, 0)
       }
-      return currentItems.filter(item => item.id !== productId)
+      
+      return newItems
     })
-  }
+  }, [])
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = useCallback((productId: string, quantity: number) => {
     if (quantity <= 0) {
       removeItem(productId)
       return
@@ -116,21 +141,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         item.id === productId ? { ...item, quantity } : item
       )
     )
-  }
+  }, [removeItem])
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setItems([])
-    toast({
-      title: "Carrinho limpo",
-      description: "Todos os itens foram removidos do carrinho",
-    })
-  }
+    
+    // Defer toast to avoid setState during render
+    setTimeout(() => {
+      toast({
+        title: "Carrinho limpo",
+        description: "Todos os itens foram removidos do carrinho",
+      })
+    }, 0)
+  }, [])
 
-  const getTotalItems = () => {
-    return items.reduce((total, item) => total + item.quantity, 0)
-  }
+  const getTotalItems = useCallback(() => {
+    return items.reduce((total, item) => total + (item.quantity || 0), 0)
+  }, [items])
 
-  const getTotalPrice = () => {
+  const getTotalPrice = useCallback(() => {
     return items.reduce((total, item) => {
       // Validação para evitar erros com valores undefined
       const itemPrice = item.price || 0
@@ -142,26 +171,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           itemQuantity >= item.promotionalPrice.quantity) {
         const promoSets = Math.floor(itemQuantity / item.promotionalPrice.quantity)
         const remainingItems = itemQuantity % item.promotionalPrice.quantity
-        const promoTotal = promoSets * item.promotionalPrice.totalPrice
+        const promoTotal = promoSets * (item.promotionalPrice.totalPrice || 0)
         const regularTotal = remainingItems * itemPrice
         return total + promoTotal + regularTotal
       }
       return total + (itemPrice * itemQuantity)
     }, 0)
+  }, [items])
+
+  const contextValue: CartContextType = {
+    items,
+    addItem,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    getTotalItems,
+    getTotalPrice,
+    isOpen,
+    setIsOpen,
   }
 
   return (
-    <CartContext.Provider value={{
-      items,
-      addItem,
-      removeItem,
-      updateQuantity,
-      clearCart,
-      getTotalItems,
-      getTotalPrice,
-      isOpen,
-      setIsOpen,
-    }}>
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   )

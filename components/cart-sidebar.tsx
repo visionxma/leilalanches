@@ -22,6 +22,22 @@ export function CartSidebar() {
     }
   }
 
+  const calculateItemSubtotal = (item: any) => {
+    if (!item.promotionalPrice || !item.promotionalPrice.quantity || !item.promotionalPrice.totalPrice) {
+      return ((item.price || 0) * (item.quantity || 0)).toFixed(2)
+    }
+    
+    if (item.quantity >= item.promotionalPrice.quantity) {
+      const promoSets = Math.floor(item.quantity / item.promotionalPrice.quantity)
+      const remainingItems = item.quantity % item.promotionalPrice.quantity
+      const promoTotal = promoSets * item.promotionalPrice.totalPrice
+      const regularTotal = remainingItems * (item.price || 0)
+      return (promoTotal + regularTotal).toFixed(2)
+    }
+    
+    return ((item.price || 0) * (item.quantity || 0)).toFixed(2)
+  }
+
   return (
     <>
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -97,7 +113,6 @@ export function CartSidebar() {
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm font-bold text-primary">R$ {item.price.toFixed(2)}</p>
                         <p className="text-sm font-bold text-primary">R$ {(item.price || 0).toFixed(2)}</p>
                       </div>
 
@@ -130,33 +145,24 @@ export function CartSidebar() {
                             {item.promotionalPrice && item.quantity >= item.promotionalPrice.quantity ? (
                               <div>
                                 <p className="text-sm font-bold text-green-600">
-                                  R$ {(() => {
-                                    const promoSets = Math.floor(item.quantity / item.promotionalPrice.quantity)
-                                    const remainingItems = item.quantity % item.promotionalPrice.quantity
-                                    const promoTotal = promoSets * item.promotionalPrice.totalPrice
-                                    const regularTotal = remainingItems * item.price
-                                    return (promoTotal + regularTotal).toFixed(2)
-                                  })()}
+                                  R$ {calculateItemSubtotal(item)}
                                 </p>
                                 <p className="text-xs text-gray-500 line-through">
-                                  if (!item.promotionalPrice || !item.promotionalPrice.quantity || !item.promotionalPrice.totalPrice) {
-                                    return (item.price * item.quantity || 0).toFixed(2)
-                                  }
-                                  R$ {(item.price * item.quantity).toFixed(2)}
+                                  R$ {((item.price || 0) * (item.quantity || 0)).toFixed(2)}
                                 </p>
                               </div>
-                                  const regularTotal = remainingItems * (item.price || 0)
+                            ) : (
                               <p className="text-sm font-bold">
-                                R$ {(item.price * item.quantity).toFixed(2)}
+                                R$ {calculateItemSubtotal(item)}
                               </p>
                             )}
                           </div>
-                                R$ {((item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                          <Button
                             size="icon"
                             variant="ghost"
                             className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
                             onClick={() => removeItem(item.id)}
-                              R$ {((item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                          >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>

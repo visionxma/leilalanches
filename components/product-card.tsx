@@ -49,13 +49,13 @@ export function ProductCard({ product, isSelected, onSelect, compact = false }: 
           {product.promotionalPrice && (
             <div className="backdrop-blur-md bg-red-500/90 rounded-full px-2 py-1 shadow-sm border border-red-400/50">
               <span className="text-xs font-bold text-white">
-                {product.promotionalPrice.quantity}x R$ {product.promotionalPrice.totalPrice.toFixed(2)}
+                {product.promotionalPrice.quantity}x R$ {(product.promotionalPrice.totalPrice || 0).toFixed(2)}
               </span>
             </div>
           )}
           <div className="backdrop-blur-md bg-white/90 rounded-full px-2 py-1 shadow-sm border border-white/50">
             <span className="text-xs font-bold text-blue-600">
-              R$ {product.price.toFixed(2)}
+              R$ {(product.price || 0).toFixed(2)}
             </span>
           </div>
         </div>

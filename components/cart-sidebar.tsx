@@ -98,6 +98,7 @@ export function CartSidebar() {
                           )}
                         </div>
                         <p className="text-sm font-bold text-primary">R$ {item.price.toFixed(2)}</p>
+                        <p className="text-sm font-bold text-primary">R$ {(item.price || 0).toFixed(2)}</p>
                       </div>
 
                       <div className="flex flex-col items-end gap-3">
@@ -138,21 +139,24 @@ export function CartSidebar() {
                                   })()}
                                 </p>
                                 <p className="text-xs text-gray-500 line-through">
+                                  if (!item.promotionalPrice || !item.promotionalPrice.quantity || !item.promotionalPrice.totalPrice) {
+                                    return (item.price * item.quantity || 0).toFixed(2)
+                                  }
                                   R$ {(item.price * item.quantity).toFixed(2)}
                                 </p>
                               </div>
-                            ) : (
+                                  const regularTotal = remainingItems * (item.price || 0)
                               <p className="text-sm font-bold">
                                 R$ {(item.price * item.quantity).toFixed(2)}
                               </p>
                             )}
                           </div>
-                          <Button
+                                R$ {((item.price || 0) * (item.quantity || 0)).toFixed(2)}
                             size="icon"
                             variant="ghost"
                             className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
                             onClick={() => removeItem(item.id)}
-                          >
+                              R$ {((item.price || 0) * (item.quantity || 0)).toFixed(2)}
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>
@@ -168,7 +172,7 @@ export function CartSidebar() {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center text-lg">
                       <span className="font-semibold">Total:</span>
-                      <span className="font-bold text-primary">R$ {getTotalPrice().toFixed(2)}</span>
+                      <span className="font-bold text-primary">R$ {(getTotalPrice() || 0).toFixed(2)}</span>
                     </div>
                   </div>
 

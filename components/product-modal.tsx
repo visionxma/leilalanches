@@ -57,9 +57,9 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
   }
 
   const handleBuyNow = () => {
-    let priceInfo = `*Preço:* R$ ${product.price.toFixed(2)}`
+    let priceInfo = `*Preço:* R$ ${(product.price || 0).toFixed(2)}`
     if (product.promotionalPrice) {
-      priceInfo += `\n*Promoção:* ${product.promotionalPrice.quantity}x por R$ ${product.promotionalPrice.totalPrice.toFixed(2)}`
+      priceInfo += `\n*Promoção:* ${product.promotionalPrice.quantity}x por R$ ${(product.promotionalPrice.totalPrice || 0).toFixed(2)}`
     }
     
     const message = `🛒 *INTERESSE EM PRODUTO*
@@ -160,7 +160,7 @@ Gostaria de mais informações sobre este produto! 🙏`
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold text-gray-900 leading-tight">{product.name}</h2>
                 <div className="flex items-center gap-4">
-                  <span className="text-3xl font-bold text-blue-600">R$ {product.price.toFixed(2)}</span>
+                  <span className="text-3xl font-bold text-blue-600">R$ {(product.price || 0).toFixed(2)}</span>
                   {product.featured && (
                     <div className="flex items-center gap-1 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm">
                       <Star className="h-4 w-4 fill-current" />

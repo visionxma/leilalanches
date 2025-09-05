@@ -132,14 +132,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const getTotalPrice = () => {
     return items.reduce((total, item) => {
-      if (item.promotionalPrice && item.quantity >= item.promotionalPrice.quantity) {
-        const promoSets = Math.floor(item.quantity / item.promotionalPrice.quantity)
-        const remainingItems = item.quantity % item.promotionalPrice.quantity
+      // Validação para evitar erros com valores undefined
+      const itemPrice = item.price || 0
+      const itemQuantity = item.quantity || 0
+      
+      if (item.promotionalPrice && 
+          item.promotionalPrice.quantity && 
+          item.promotionalPrice.totalPrice && 
+          itemQuantity >= item.promotionalPrice.quantity) {
+        const promoSets = Math.floor(itemQuantity / item.promotionalPrice.quantity)
+        const remainingItems = itemQuantity % item.promotionalPrice.quantity
         const promoTotal = promoSets * item.promotionalPrice.totalPrice
-        const regularTotal = remainingItems * item.price
+        const regularTotal = remainingItems * itemPrice
         return total + promoTotal + regularTotal
       }
-      return total + (item.price * item.quantity)
+      return total + (itemPrice * itemQuantity)
     }, 0)
   }
 
